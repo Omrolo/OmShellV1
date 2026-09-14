@@ -1,0 +1,1 @@
+// color transparencia general:"#5b000000"
