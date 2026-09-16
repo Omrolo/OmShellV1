@@ -13,7 +13,7 @@ Rectangle {
     property string label: ""
     property color iconColor: "#2157f9"
     property int iconSize: 16
-    
+
     // Offset de precisión para el ícono
     property int iconXOffset: 0
     property int iconYOffset: 0

@@ -5,6 +5,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell.Services.Mpris
 import Quickshell.Io
+import Quickshell.Services.UPower
 import "./theme"
 import "./app_launcher"
 import "./centro_control"
@@ -16,12 +17,37 @@ ShellRoot {
 
     ControlCenter{}
 
+
+    readonly property int volumeLevel: {
+    const parts = audioState.value.split("|")
+    return Number(parts[0]) || 0
+    }
+
+    readonly property bool isMuted:
+    audioState.value.endsWith("|MUTED")
+
+    QtObject {
+    id: battery
+
+    readonly property var device: UPower.displayDevice
+
+    readonly property int percentage:
+        device ? Math.round(device.percentage) : 0
+
+    readonly property bool charging:
+        device && (
+            device.state === UPowerDeviceState.Charging ||
+            device.state === UPowerDeviceState.PendingCharge ||
+            device.state === UPowerDeviceState.FullyCharged
+        )
+}
+
     AudioPopup {
         id: audioPopup
 
         anchorItem: volumeButton
 
-        volume: Number(vol.value)
+        volume: root.volumeLevel
     }
 
 
@@ -30,7 +56,6 @@ ShellRoot {
 
         anchorItem: batteryButton
 
-        batteryPercent: Number(bat.value)
     }
 
 
@@ -95,21 +120,11 @@ ShellRoot {
         }
 
         Poller {
-            id: vol
-            command: "wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print int($2 * 100)}'"
-            interval: 100
-        }
+            id: audioState
 
-        Poller {
-            id: mute
-            command: "wpctl get-volume @DEFAULT_AUDIO_SINK@ | grep -q MUTED && echo MUTED || echo UNMUTED"
-            interval: 100
-        }
+            command: "wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print int($2 * 100) \"|\" ($0 ~ /MUTED/ ? \"MUTED\" : \"UNMUTED\")}'"
 
-        Poller {
-            id: bat
-            command: "cat /sys/class/power_supply/BAT0/capacity"
-            interval: 30000
+            interval: 150
         }
 
         Poller {
@@ -139,6 +154,8 @@ ShellRoot {
             ?? Mpris.players.values[0]
             ?? null
 
+
+
         RowLayout {
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
@@ -146,11 +163,11 @@ ShellRoot {
             spacing: 8
 
             Pill {
-                icon: "" //busqueda insana
+                icon: "" //busqueda insana
                 iconSize: 25
                 iconYOffset: -1
                 iconXOffset: 0
-                iconColor: "#2157f9"
+                iconColor: '#0afbff'
                 backgroundColor: "transparent"
                 borderColor: "transparent"
                 borderWidth: 3
@@ -208,15 +225,15 @@ ShellRoot {
             Pill {
                 id: volumeButton
 
-                property bool isMuted: mute.value === "MUTED"
+                property bool isMuted: root.isMuted
 
                 icon: isMuted
                     ? ""
-                    : vol.value >= 70
+                    : root.volumeLevel >= 70
                         ? ""
-                        : vol.value >= 33
+                        : root.volumeLevel >= 33
                             ? ""
-                            : vol.value >=1
+                            : root.volumeLevel >= 1
                                 ? ""
                                 : ""
 
@@ -242,7 +259,8 @@ ShellRoot {
                 onClicked: {
                     audioPopup.visible = !audioPopup.visible
                 }
-                implicitWidth:33
+
+                implicitWidth: 33
             }
 
 
@@ -250,45 +268,14 @@ ShellRoot {
             // BATERÍA
             // ─────────────────────────
 
-            Pill {
+            BatteryIndicator {
                 id: batteryButton
-
-                icon: {
-                    let value = Number(bat.value)
-
-                    if (value >= 90) return ""
-                    if (value >= 70) return ""
-                    if (value >= 40) return ""
-                    if (value >= 15) return ""
-
-                    return ""
-                }
-
-                iconSize: 20
-                iconYOffset: -1
-                iconXOffset: 0
-                iconColor: {
-                    let value = Number(bat.value)
-
-                    if (value <= 10)
-                        return '#d70000'
-
-                    if (value <= 20)
-                        return '#e46700'
-
-                    if (value <= 79)
-                        return '#ffffff'
-
-                    return "#51ff32"
-                    }
-
-                backgroundColor: "#5b000000"
+                iconX: 1
+                iconY: -1
 
                 onClicked: {
                     batteryPopup.visible = !batteryPopup.visible
                 }
-
-                implicitWidth:33
             }
 
 
@@ -325,11 +312,7 @@ ShellRoot {
                     : 2
 
                 onClicked: {
-                        command = [
-                        "bluetoothctl",
-                        "power",
-                        bluetoothOn ? "off" : "on"
-                    ]
+                        bluetoothPopup.visible = !bluetoothPopup.visible
                 }
                 implicitWidth:33
 
@@ -370,7 +353,7 @@ ShellRoot {
                     : 2
 
                 onClicked: {
-                    wifiPopup.toggleWifi()
+                    wifiPopup.visible = !wifiPopup.visible
                 }
 
                 implicitWidth:33

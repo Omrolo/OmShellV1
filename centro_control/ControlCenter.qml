@@ -15,7 +15,6 @@ PanelWindow {
     visible: State.ControlCenterState.visible
     // ============================================================
     // OPACIDADES
-    // Edita estos valores directamente desde tu editor.
     // ============================================================
 
     property real panelOpacity: 1.0
@@ -82,15 +81,15 @@ PanelWindow {
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        anchors.topMargin: 42
+        anchors.topMargin: 43
 
         bottomLeftRadius: 18
         bottomRightRadius: 18
 
-        color: '#72000000'
+        color: '#9e000000'
         opacity: root.panelOpacity
 
-        border.width: 2
+        border.width: 0
         border.color: '#000000'
 
 

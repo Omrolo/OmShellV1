@@ -13,8 +13,8 @@ PopupWindow {
 
     property bool enabled: true
 
-    width: 40
-    height: 40
+    width: 36
+    height: 36
 
     color: "transparent"
 
@@ -22,13 +22,13 @@ PopupWindow {
 
     anchor.gravity: Edges.Bottom
     anchor.edges: Edges.Top
-    anchor.margins.top: 30
+    anchor.margins.top: 38
 
     Rectangle {
         anchors.fill: parent
 
         color: "#5b000000"
-        radius: width / 2
+        radius: 10
 
         Column {
             anchors.centerIn: parent
@@ -46,6 +46,8 @@ PopupWindow {
                     : "#777777"
                     
                 iconSize: 20
+                iconYOffset: -1
+                iconXOffset: -5
 
                 onClicked: {
                     root.toggleWifi()

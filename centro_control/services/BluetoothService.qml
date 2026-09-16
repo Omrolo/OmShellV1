@@ -150,7 +150,7 @@ Item {
     // ─────────────────────────────
 
     Timer {
-        interval: 5000
+        interval: 8000
         running: true
         repeat: true
 

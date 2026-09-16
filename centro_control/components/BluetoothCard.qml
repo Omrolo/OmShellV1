@@ -1,5 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
+
 
 Item {
     id: root
@@ -31,6 +33,9 @@ Item {
             }
 
             Rectangle {
+                id: deviceslayout
+
+
                 Layout.fillWidth: true
 
                 height: 38
@@ -57,6 +62,8 @@ Item {
             }
 
             IconButton {
+                id: optionsButton
+
                 icon:
                     root.menuOpen
                     ? "󰅃"
@@ -71,35 +78,90 @@ Item {
             }
         }
 
-        Rectangle {
-            Layout.fillWidth: true
+        PopupWindow {
+            id: bluetoothDevicesPopup
 
-            visible:
-                root.menuOpen
+            visible: root.menuOpen
 
-            implicitHeight:
-                devicesColumn.implicitHeight + 16
+            width: 275
 
-            radius: 10
+            implicitHeight: devicesColumn.implicitHeight + 16
 
-            color: "#313244"
+            color: "transparent"
 
-            ColumnLayout {
-                id: devicesColumn
 
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    top: parent.top
+                anchor.rect {
+                x: 0
+                y: deviceslayout.height + 3
+                width: deviceslayout.width
+                height: 10
+            }
 
-                    margins: 8
-                }
+            anchor.item: deviceslayout
+            anchor.gravity: Edges.Bottom
+            anchor.edges: Edges.Top
 
-                Repeater {
-                    model:
-                        root.bluetooth.devices
 
-                    delegate: Rectangle {
+            Rectangle {
+                anchors.fill: parent
+
+                radius: 10
+
+                color: "#313244"
+
+                ColumnLayout {
+                    id: devicesColumn
+
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                        top: parent.top
+
+                        margins: 8
+                    }
+
+                    spacing: 4
+
+                    Repeater {
+                        model: root.bluetooth.devices
+
+                        delegate: Rectangle {
+                            Layout.fillWidth: true
+
+                            height: 34
+
+                            radius: 7
+
+                            color: "#45475a"
+
+                            Text {
+                                anchors {
+                                    left: parent.left
+                                    verticalCenter: parent.verticalCenter
+
+                                    leftMargin: 10
+                                }
+
+                                text: modelData.name
+
+                                color: "#cdd6f4"
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+
+                                onClicked: {
+                                    root.bluetooth.connect(
+                                        modelData.mac
+                                    )
+
+                                    root.menuOpen = false
+                                }
+                            }
+                        }
+                    }
+
+                    Rectangle {
                         Layout.fillWidth: true
 
                         height: 34
@@ -109,26 +171,19 @@ Item {
                         color: "#45475a"
 
                         Text {
-                            anchors {
-                                left: parent.left
-                                verticalCenter: parent.verticalCenter
+                            anchors.centerIn: parent
 
-                                leftMargin: 10
-                            }
+                            text: "Vincular nuevo dispositivo"
 
-                            text:
-                                modelData.name
-
-                            color: "#cdd6f4"//color texto opciones
+                            color: "#a6adc8"
                         }
 
                         MouseArea {
                             anchors.fill: parent
 
-                            onClicked:
-                                root.bluetooth.connect(
-                                    modelData.mac
-                                )
+                            onClicked: {
+                                // Tu lógica para vincular
+                            }
                         }
                     }
                 }
